@@ -201,7 +201,7 @@ def main():
     parser.add_argument("-o", "--output", help="Specify output file.")
     args = parser.parse_args()
 
-    if not args.domain and not args.list and not args.urls:
+    if not args.domain and not args.list:
         parser.error("Please provide either the -d option, the -l option, or the -u option.")
 
     if args.domain and args.list:
