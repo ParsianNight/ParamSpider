@@ -3,7 +3,7 @@ import os
 import logging
 import colorama
 from colorama import Fore, Style
-from . import client  # Importing client from a module named "client"
+import client  # Importing client from a module named "client"
 from urllib.parse import urlparse, parse_qs, urlencode
 import os
 
