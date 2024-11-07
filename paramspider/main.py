@@ -79,7 +79,7 @@ def clean_urls(urls, extensions, placeholder):
     return list(cleaned_urls)
 
 
-def read_and_clean_urls(links_file, extensions, stream_output, proxy, placeholder):
+def read_and_clean_urls(links_file, extensions, stream_output, proxy, placeholder,outputFile):
     """
     Read and clean URLs from a file and filter based on specified extensions.
 
@@ -163,7 +163,7 @@ def fetch_and_clean_urls(domain, extensions, stream_output,proxy, placeholder,ou
     logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Found {Fore.GREEN + str(len(cleaned_urls)) + Style.RESET_ALL} URLs after cleaning")
     logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Extracting URLs with parameters")
     
-    if not outputFile:
+    if outputFile:
         with open(outputFile, "w") as f:
             for url in cleaned_urls:
                 if "?" in url:
