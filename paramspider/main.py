@@ -107,23 +107,36 @@ def read_and_clean_urls(links_file, extensions, stream_output, proxy, placeholde
     logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Found {Fore.GREEN + str(len(cleaned_urls)) + Style.RESET_ALL} URLs after cleaning")
     logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Extracting URLs with parameters")
 
-    # Create results directory if it doesn't exist
-    results_dir = "results"
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
+# Check if outputFile is provided
+    if not outputFile:
+        # Create results directory if it doesn't exist
+        results_dir = "results"
+        if not os.path.exists(results_dir):
+            os.makedirs(results_dir)
 
-    # Define output file for cleaned URLs
-    result_file = os.path.join(results_dir, f"{os.path.basename(links_file)}_cleaned.txt")
+        # Define output file for cleaned URLs
+        result_file = os.path.join(results_dir, f"{os.path.basename(links_file)}_cleaned.txt")
 
-    # Write cleaned URLs with parameters to file
-    with open(result_file, "w") as f:
-        for url in cleaned_urls:
-            if "?" in url:
-                f.write(url + "\n")
-                if stream_output:
-                    print(url)
-    
-    logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Saved cleaned URLs to {Fore.CYAN + result_file + Style.RESET_ALL}")
+        # Write cleaned URLs with parameters to file
+        with open(result_file, "w") as f:
+            for url in cleaned_urls:
+                if "?" in url:
+                    f.write(url + "\n")
+                    if stream_output:
+                        print(url)
+        
+        logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Saved cleaned URLs to {Fore.CYAN + result_file + Style.RESET_ALL}")
+
+    else:
+        # Use provided outputFile directly
+        with open(outputFile, "w") as f:
+            for url in cleaned_urls:
+                if "?" in url:
+                    f.write(url + "\n")
+                    if stream_output:
+                        print(url)
+        
+        logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Saved cleaned URLs to {Fore.CYAN + outputFile + Style.RESET_ALL}")
 
 
 def fetch_and_clean_urls(domain, extensions, stream_output,proxy, placeholder,outputFile):
@@ -157,7 +170,8 @@ def fetch_and_clean_urls(domain, extensions, stream_output,proxy, placeholder,ou
                     f.write(url + "\n")
                     if stream_output:
                         print(url)
-        
+        logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Saved cleaned URLs to {Fore.CYAN + outputFile + Style.RESET_ALL}")
+
     else:
         results_dir = "results"
         if not os.path.exists(results_dir):
@@ -171,9 +185,9 @@ def fetch_and_clean_urls(domain, extensions, stream_output,proxy, placeholder,ou
                     f.write(url + "\n")
                     if stream_output:
                         print(url)
+        logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Saved cleaned URLs to {Fore.CYAN + result_file + Style.RESET_ALL}")
 
     
-    logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Saved cleaned URLs to {Fore.CYAN + result_file + Style.RESET_ALL}")
 
 def main():
     """
