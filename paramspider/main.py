@@ -78,7 +78,55 @@ def clean_urls(urls, extensions, placeholder):
             cleaned_urls.add(cleaned_url)
     return list(cleaned_urls)
 
-def fetch_and_clean_urls(domain, extensions, stream_output,proxy, placeholder):
+
+def read_and_clean_urls(links_file, extensions, stream_output, proxy, placeholder):
+    """
+    Read and clean URLs from a file and filter based on specified extensions.
+
+    Args:
+        links_file (str): Path to the file containing URLs.
+        extensions (list): List of file extensions to check against.
+        stream_output (bool): True to stream URLs to the terminal.
+        proxy (str): Proxy server to use if needed.
+        placeholder (str): Placeholder for filtering URLs.
+
+    Returns:
+        None
+    """
+    logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Reading URLs from file {Fore.CYAN + links_file + Style.RESET_ALL}")
+
+    # Read URLs from file
+    with open(links_file, "r") as f:
+        urls = f.read().splitlines()
+    
+    logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Found {Fore.GREEN + str(len(urls)) + Style.RESET_ALL} URLs in {Fore.CYAN + links_file + Style.RESET_ALL}")
+    
+    # Clean the URLs based on extensions and placeholder
+    cleaned_urls = clean_urls(urls, extensions, placeholder)
+    logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Cleaning URLs from {Fore.CYAN + links_file + Style.RESET_ALL}")
+    logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Found {Fore.GREEN + str(len(cleaned_urls)) + Style.RESET_ALL} URLs after cleaning")
+    logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Extracting URLs with parameters")
+
+    # Create results directory if it doesn't exist
+    results_dir = "results"
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+
+    # Define output file for cleaned URLs
+    result_file = os.path.join(results_dir, f"{os.path.basename(links_file)}_cleaned.txt")
+
+    # Write cleaned URLs with parameters to file
+    with open(result_file, "w") as f:
+        for url in cleaned_urls:
+            if "?" in url:
+                f.write(url + "\n")
+                if stream_output:
+                    print(url)
+    
+    logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Saved cleaned URLs to {Fore.CYAN + result_file + Style.RESET_ALL}")
+
+
+def fetch_and_clean_urls(domain, extensions, stream_output,proxy, placeholder,outputFile):
     """
     Fetch and clean URLs related to a specific domain from the Wayback Machine.
 
@@ -102,18 +150,28 @@ def fetch_and_clean_urls(domain, extensions, stream_output,proxy, placeholder):
     logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Found {Fore.GREEN + str(len(cleaned_urls)) + Style.RESET_ALL} URLs after cleaning")
     logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Extracting URLs with parameters")
     
-    results_dir = "results"
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
+    if not outputFile:
+        with open(outputFile, "w") as f:
+            for url in cleaned_urls:
+                if "?" in url:
+                    f.write(url + "\n")
+                    if stream_output:
+                        print(url)
+        
+    else:
+        results_dir = "results"
+        if not os.path.exists(results_dir):
+            os.makedirs(results_dir)
 
-    result_file = os.path.join(results_dir, f"{domain}.txt")
+        result_file = os.path.join(results_dir, f"{domain}.txt")
 
-    with open(result_file, "w") as f:
-        for url in cleaned_urls:
-            if "?" in url:
-                f.write(url + "\n")
-                if stream_output:
-                    print(url)
+        with open(result_file, "w") as f:
+            for url in cleaned_urls:
+                if "?" in url:
+                    f.write(url + "\n")
+                    if stream_output:
+                        print(url)
+
     
     logging.info(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} Saved cleaned URLs to {Fore.CYAN + result_file + Style.RESET_ALL}")
 
@@ -139,10 +197,12 @@ def main():
     parser.add_argument("-s", "--stream", action="store_true", help="Stream URLs on the terminal.")
     parser.add_argument("--proxy", help="Set the proxy address for web requests.",default=None)
     parser.add_argument("-p", "--placeholder", help="placeholder for parameter values", default="FUZZ")
+    parser.add_argument("-u", "--urls", help="File containing urls ready for parameters extraction")
+    parser.add_argument("-o", "--output", help="Specify output file.")
     args = parser.parse_args()
 
-    if not args.domain and not args.list:
-        parser.error("Please provide either the -d option or the -l option.")
+    if not args.domain and not args.list and not args.urls:
+        parser.error("Please provide either the -d option, the -l option, or the -u option.")
 
     if args.domain and args.list:
         parser.error("Please provide either the -d option or the -l option, not both.")
@@ -156,13 +216,13 @@ def main():
         domain = args.domain
 
     extensions = HARDCODED_EXTENSIONS
-
+    
     if args.domain:
-        fetch_and_clean_urls(domain, extensions, args.stream, args.proxy, args.placeholder)
+        fetch_and_clean_urls(domain, extensions, args.stream, args.proxy, args.placeholder, args.output)
 
     if args.list:
         for domain in domains:
-            fetch_and_clean_urls(domain, extensions, args.stream,args.proxy, args.placeholder)
+            fetch_and_clean_urls(domain, extensions, args.stream,args.proxy, args.placeholder,args.output)
 
 if __name__ == "__main__":
     main()
